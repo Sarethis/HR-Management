@@ -16,35 +16,25 @@ namespace HR_Management
 
         private bool Login()
         {
+            ValuesChecker();
+
             var users = _fileHelper.DeserializeFromFileXML();
-            if (!ValuesChecker())
-                return false;
             var userLoginFinded = users.FirstOrDefault(x => x.Name == txbLoginName.Text);
+
             if (userLoginFinded == null)
-            {
-                MessageBox.Show("There is no such user with that login. Create one.", "No user error");
-                return false;
-            }
+                throw new Exception("There is no such user with that login. Create one.");
             if (userLoginFinded.Name == txbLoginName.Text && StringCipher.Decrypt(userLoginFinded.Password, Program.passwordHashKey) == txbPassword.Text)
             {
                 _userLogedId = userLoginFinded.Id;
                 return true;
             }
             else
-            {
-                MessageBox.Show("No user or wrong login or password. Try again.", "Login/password error");
-                return false;
-            }
+                throw new Exception("No user or wrong login or password. Try again.");
         }
-        private bool ValuesChecker()
+        private void ValuesChecker()
         {
             if (txbLoginName.Text == "" || txbPassword.Text == "")
-            {
-                MessageBox.Show("Please enter proper values in every text box.", "Text boxes nulls");
-                return false;
-            }
-            else
-                return true;
+                throw new Exception("Please enter proper values in every text box.");
         }
 
         private void btnExit_Click(object sender, EventArgs e)
@@ -54,12 +44,16 @@ namespace HR_Management
 
         private void btnLogin_Click(object sender, EventArgs e)
         {
-            if (Login())
+            try
             {
+                Login();
                 var hrManager = new HrManagerForm(_userLogedId);
                 hrManager.ShowDialog();
             }
-
+            catch (Exception exception)
+            {
+                MessageBox.Show(exception.Message, "Error loging in");
+            }
         }
 
         private void btnCreateNewUser_Click(object sender, EventArgs e)

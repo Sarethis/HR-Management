@@ -26,28 +26,19 @@ namespace HR_Management
             cmbAccountLevel.ValueMember = "Id";
         }
 
-        private bool CreateUser()
+        private void CreateUser()
         {
             var users = _fileHelper.DeserializeFromFileXML();
-            if (CheckIfUserIsNotRegistered(users))
-            {
-                AssignIdToNewUser(users);
-                AddNewUserToList(users);
-                _fileHelper.SerializeToFileXML(users);
-                return true;
-            }
-            return false;
+            CheckIfUserIsNotRegistered(users);
+            AssignIdToNewUser(users);
+            AddNewUserToList(users);
+            _fileHelper.SerializeToFileXML(users);
         }
 
-        private bool CheckIfUserIsNotRegistered(List<User> users)
+        private void CheckIfUserIsNotRegistered(List<User> users)
         {
             if (users.Any(x => x.Name == txbLoginName.Text))
-            {
-                MessageBox.Show("User with that login already exist, please pick another one.", "User login error");
-                return false;
-            }
-            else
-                return true;
+                throw new Exception("User with that login already exist, please pick another one.");
         }
 
         private void AddNewUserToList(List<User> users)
@@ -73,27 +64,24 @@ namespace HR_Management
 
         private void btnCreate_Click(object sender, EventArgs e)
         {
-            if (!ValuesChecker())
-                return;
-
-            if (CreateUser())
+            try
+            {
+                ValuesChecker();
+                CreateUser();
                 Close();
+            }
+            catch (Exception exception)
+            { 
+                MessageBox.Show(exception.Message, "Error while creating User"); 
+            }
         }
 
-        private bool ValuesChecker ()
+        private void ValuesChecker ()
         {
             if (string.IsNullOrWhiteSpace(txbLoginName.Text) || string.IsNullOrWhiteSpace(txbPassword.Text) || string.IsNullOrWhiteSpace(txbPasswordAgain.Text))
-            {
-                MessageBox.Show("Please enter proper values in every text box.", "Text boxes nulls");
-                return false;
-            }
+                throw new Exception("Please enter proper values in every text box.");
             else if (!(txbPassword.Text == txbPasswordAgain.Text))
-            {
-                MessageBox.Show("Password dosn't mach! Please correct and continue.", "Creating password error");
-                return false;
-            }
-            else
-                return true;
+                throw new Exception("Password dosn't mach! Please correct and continue.");
         }
 
         private void btnBack_Click(object sender, EventArgs e)

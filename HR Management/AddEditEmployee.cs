@@ -67,10 +67,7 @@ namespace HR_Management
         private bool AddEmployee(List<Employee> employes)
         {
             if (!double.TryParse(txbSalary.Text, out double salary))
-            {
-                MessageBox.Show("Please enter numeric value in Salary text box.", "Input value error");
-                return false;
-            }
+                throw new Exception("Please enter numeric value in Salary text box.");
             else
             {
                 var employee = new Employee
@@ -115,11 +112,15 @@ namespace HR_Management
                 employes.RemoveAll(x => x.Id == _employeeId);
             else
                 AssignIdToNewEmployee(employes);
-
-            if (AddEmployee(employes))
+            try
             {
+                AddEmployee(employes);
                 _fileHelperE.SerializeToFile(employes);
                 Close();
+            }
+            catch (Exception exception)
+            {
+                MessageBox.Show(exception.Message, "Error input data");
             }
         }
         private void btnCancel_Click(object sender, EventArgs e)
